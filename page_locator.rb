@@ -30,7 +30,6 @@ class Locator
 	end
 
 	def page_loader													#load pages from directory
-
 		foo = Dir.glob("data/*")
 		foo.each do |x|
 			file = File.open(x)
@@ -45,8 +44,8 @@ class Locator
 		
 		final_array << title_query = read_html_doc.css("#btAsinTitle").text
 		final_array << author_query = read_html_doc.css("#handleBuy > div.buying > span").text.strip.gsub(/\s+/, " ")
-		price_query = read_html_doc.css("#actualPriceValue > b").text
 
+		price_query = read_html_doc.css("#actualPriceValue > b").text
 		if price_query == ""
 			price_query = read_html_doc.css("#hardcover_meta_binding_winner tr td.price").text.strip.gsub(/\s+/, " ")
 			final_array << price_query
@@ -54,23 +53,22 @@ class Locator
 			final_array << price_query
 		end
 
-		read_html_doc.css("#productDetailsTable div ul li").each do |f|
-			work_array << f.text
+		read_html_doc.css("#productDetailsTable div ul li").each do |x|
+			work_array << x.text
 			work_array.compact
 		end
-		
-		work_array.each do |f|
-			if f.include?('Shipping Weight:')
-				weight_query = f
+		work_array.each do |query|
+			if query.include?('Shipping Weight:')
+				weight_query = query.chomp(" (View shipping rates and policies)")
 				final_array << weight_query
-			elsif f.include?('ISBN-10')
-				isbn_query = f 
+			elsif query.include?('ISBN-10')
+				isbn_query = query 
 				final_array << isbn_query
 			end
 		end
 
 		final_array.each do |output|
-			p output.to_s
+			p output
 		end
 		puts ""
 	end
