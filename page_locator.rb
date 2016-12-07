@@ -1,12 +1,9 @@
 require 'rubygems'
 require 'nokogiri'
+require 'sqlite3'
 require 'pry'
 
-class Locator
-	def initialize
-		@final_array = []
-	end
-
+class Startup
 	def main_menu
 		loop do
 			puts ""
@@ -21,10 +18,11 @@ class Locator
 			case gets.chomp
 				when '1'
 					puts "***********************************************************************"
-					page_loader
+					new_locator = Locator.new
+					new_locator.page_loader
 				when '2'
 					puts "***********************************************************************"
-					sorter_exe = Sorter.new(@final_array)
+					sorter_exe = Sorter.new
 					sorter_exe.hello
 				when '9'
 					puts "***********************************************************************"
@@ -37,6 +35,12 @@ class Locator
 			end
 		end
 	end
+end
+
+class Locator
+	def initialize
+		@final_array = []
+	end
 
 	def page_loader													#load pages from directory
 		foo = Dir.glob("data/*")
@@ -45,6 +49,8 @@ class Locator
 			page_parser(file)
 		end
 		puts "Array of books compiled!"
+		create_books_table
+		puts "Table made!"
 	end
 
 	def page_parser(file)											#Parse through each page send from page_loader()
@@ -56,9 +62,9 @@ class Locator
 		package_array << title_query = read_html_doc.css("#btAsinTitle").text
 		package_array << author_query = read_html_doc.css("#handleBuy > div.buying > span").text.strip.gsub(/\s+/, " ")
 
-		price_query = read_html_doc.css("#actualPriceValue > b").text
+		price_query = read_html_doc.css("#actualPriceValue > b").text.delete("^0-9.").to_f
 		if price_query == ""
-			price_query = read_html_doc.css("#hardcover_meta_binding_winner tr td.price").text.strip.gsub(/\s+/, " ")
+			price_query = read_html_doc.css("#hardcover_meta_binding_winner tr td.price").text.delete("^0-9.").to_f
 			package_array << price_query
 		else
 			package_array << price_query
@@ -81,11 +87,82 @@ class Locator
 		@final_array << package_array
 	end
 
-	# def final_output
-	# 	weight_sorted_array = @final_array.sort { |a, b| a[4] <=> b[4] }
-	# 	puts weight_sorted_array
-	# end
+	def create_books_table
+		puts "What would you like you book information file to be called?"
+		book_info_title = gets.chomp
+		puts "Creating table..."
+		db = SQLite3::Database.new('db/' + book_info_title + '.db')
+		db.execute %q{
+			CREATE TABLE bookstack (
+			Id INTEGER PRIMARY KEY,
+			title VARCHAR(255),
+			author VARCHAR(255),
+			price DECIMAl(10,2),
+			isbn VARCHAR(255),
+			weight DECIMAl(10, 2) )
+		}
+		puts "Would you like to commit your current book information to the database?"
+		puts "Enter 1 to confirm and 2 to abort."
+		case gets.chomp
+			when '1'
+				update_books_table
+			when '2'
+				puts "Aborting, table has been made but not populated"
+			else
+				"Please select a valid option"
+		end
+	end
+
+	def update_books_table
+		puts "***************************************************************************************************************"
+		puts "Please select the file you would like the book information to be populated with..."
+		files = Dir.glob('db/*')
+		files.each do |x|
+			puts x
+		end
+
+		request = gets.chomp
+
+		# begin
+		# 	bank_db = SQLite3::Database.open "db_bank_file"
+		# 	bank_db.transaction
+		# 	bank_db.execute("UPDATE bookstack SET balance = ? WHERE account_number = ?", arg, @selected_account['account_number'])
+		# 	bank_db.commit
+
+		# rescue SQLite3::Exception => e 
+		# 	puts "Exception occurred"
+	 #   		puts e
+	 #    	bank_db.rollback
+	    
+		# ensure
+	 #    	bank_db.close if bank_db
+		# end
+	end
+
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 class Sorter
 	attr_reader :final_array
@@ -96,13 +173,10 @@ class Sorter
 
 	def hello
 		puts "Hello World!"
-		@array_of_books.each do |x|
-			puts x
-		end
 	end
 end
 
-run_program = Locator.new
+run_program = Startup.new
 run_program.main_menu
 
 
