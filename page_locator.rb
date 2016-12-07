@@ -3,13 +3,18 @@ require 'nokogiri'
 require 'pry'
 
 class Locator
+	def initialize
+		@final_array = []
+	end
+
 	def main_menu
 		loop do
 			puts ""
 			puts "***********************************************************************"
-			puts "Welcome to Pack-a-back!"
+			puts "Welcome to Pack-A-Book!"
 			puts "Please select an option: "
 			puts "Enter 1 to locate books relevant to your specifications."
+			puts "Enter 2 to sort the books into [X] amount of boxes for shipping."
 			puts "Enter 9 to exit"
 			puts "***********************************************************************"
 
@@ -17,6 +22,10 @@ class Locator
 				when '1'
 					puts "***********************************************************************"
 					page_loader
+				when '2'
+					puts "***********************************************************************"
+					sorter_exe = Sorter.new(@final_array)
+					sorter_exe.hello
 				when '9'
 					puts "***********************************************************************"
 					puts "Goodbye!"
@@ -35,22 +44,24 @@ class Locator
 			file = File.open(x)
 			page_parser(file)
 		end
+		puts "Array of books compiled!"
 	end
 
 	def page_parser(file)											#Parse through each page send from page_loader()
 		work_array = []
-		final_array = []
+		package_array = []
+
 		read_html_doc = File.open(file) { |f| Nokogiri::HTML(f) }	#use Nokogirl parser
 		
-		final_array << title_query = read_html_doc.css("#btAsinTitle").text
-		final_array << author_query = read_html_doc.css("#handleBuy > div.buying > span").text.strip.gsub(/\s+/, " ")
+		package_array << title_query = read_html_doc.css("#btAsinTitle").text
+		package_array << author_query = read_html_doc.css("#handleBuy > div.buying > span").text.strip.gsub(/\s+/, " ")
 
 		price_query = read_html_doc.css("#actualPriceValue > b").text
 		if price_query == ""
 			price_query = read_html_doc.css("#hardcover_meta_binding_winner tr td.price").text.strip.gsub(/\s+/, " ")
-			final_array << price_query
+			package_array << price_query
 		else
-			final_array << price_query
+			package_array << price_query
 		end
 
 		read_html_doc.css("#productDetailsTable div ul li").each do |x|
@@ -59,23 +70,40 @@ class Locator
 		end
 		work_array.each do |query|
 			if query.include?('Shipping Weight:')
-				weight_query = query.chomp(" (View shipping rates and policies)")
-				final_array << weight_query
+				weight_query = query.delete("^0-9.").to_f							#.chomp(" (View shipping rates and policies)")
+				package_array << weight_query
 			elsif query.include?('ISBN-10')
 				isbn_query = query 
-				final_array << isbn_query
+				package_array << isbn_query
 			end
 		end
 
-		final_array.each do |output|
-			p output
+		@final_array << package_array
+	end
+
+	# def final_output
+	# 	weight_sorted_array = @final_array.sort { |a, b| a[4] <=> b[4] }
+	# 	puts weight_sorted_array
+	# end
+end
+
+class Sorter
+	attr_reader :final_array
+
+	def initalize(final_array)
+		@array_of_books = final_array
+	end
+
+	def hello
+		puts "Hello World!"
+		@array_of_books.each do |x|
+			puts x
 		end
-		puts ""
 	end
 end
 
-test1 = Locator.new
-test1.main_menu
+run_program = Locator.new
+run_program.main_menu
 
 
 
