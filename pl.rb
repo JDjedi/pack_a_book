@@ -1,9 +1,12 @@
 require 'rubygems'
 require 'nokogiri'
-require 'sqlite3'
 require 'pry'
 
-class Startup
+class Locator
+	def initialize
+		@work_array = []
+	end
+
 	def main_menu
 		loop do
 			puts ""
@@ -18,11 +21,10 @@ class Startup
 			case gets.chomp
 				when '1'
 					puts "***********************************************************************"
-					new_locator = Locator.new
-					new_locator.page_loader
+					page_loader
 				when '2'
 					puts "***********************************************************************"
-					sorter_exe = Sorter.new
+					sorter_exe = Sorter.new(@work_array)
 					sorter_exe.hello
 				when '9'
 					puts "***********************************************************************"
@@ -35,12 +37,6 @@ class Startup
 			end
 		end
 	end
-end
-
-class Locator
-	def initialize
-		@final_array = []
-	end
 
 	def page_loader													#load pages from directory
 		foo = Dir.glob("data/*")
@@ -49,12 +45,10 @@ class Locator
 			page_parser(file)
 		end
 		puts "Array of books compiled!"
-		create_books_table
-		puts "Table made!"
 	end
 
 	def page_parser(file)											#Parse through each page send from page_loader()
-		work_array = []
+		detail_parsed_array = []
 		package_array = []
 
 		read_html_doc = File.open(file) { |f| Nokogiri::HTML(f) }	#use Nokogirl parser
@@ -71,12 +65,12 @@ class Locator
 		end
 
 		read_html_doc.css("#productDetailsTable div ul li").each do |x|
-			work_array << x.text
-			work_array.compact
+			detail_parsed_array << x.text
+			detail_parsed_array.compact
 		end
-		work_array.each do |query|
+		detail_parsed_array.each do |query|
 			if query.include?('Shipping Weight:')
-				weight_query = query.delete("^0-9.").to_f							#.chomp(" (View shipping rates and policies)")
+				weight_query = query.delete("^0-9.").to_f							
 				package_array << weight_query
 			elsif query.include?('ISBN-10')
 				isbn_query = query 
@@ -84,48 +78,30 @@ class Locator
 			end
 		end
 
-		@final_array << package_array
+		@work_array << package_array
 	end
 
+	def final_output
+		weight_sorted_array = @work_array.sort { |a, b| a[4] <=> b[4] }
+		puts weight_sorted_array
+	end
 end
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 class Sorter
-	attr_reader :final_array
+	attr_accessor :work_array
 
-	def initalize(final_array)
-		@array_of_books = final_array
+	def initalize(work_array)
+		@array_of_books = work_array
 	end
 
 	def hello
 		puts "Hello World!"
+		@array_of_books.each do |x|
+			puts x
+		end
 	end
 end
 
-run_program = Startup.new
+run_program = Locator.new
 run_program.main_menu
-
-
 
