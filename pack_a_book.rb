@@ -92,15 +92,38 @@ class Sorter
 
 	def initialize(work_array)
 		@work_array = work_array
-		@sorted_work_array = []
+		@packing_array = []
+		@box_assortment_array = []
 	end
 
 	def sort
-		@sorted_work_array = @work_array.sort! { |x, y| x[:weight] <=> y[:weight] }
-		@sorted_work_array.each do |x|
-			puts x
-			puts
+		box = 0.0
+		@work_array = @work_array.sort! { |x, y| y[:weight] <=> x[:weight] }
+
+		while @work_array.length > 0 do 
+			while box <= 10.0 do 
+				binding.pry
+				box = box + @work_array[0][:weight].to_f
+				binding.pry
+				@packing_array << @work_array[0].shift
+				binding.pry
+			end
+			binding.pry
+			box = 0.0
+			@box_assortment_array << @packing_array
+			@packing_array = []
 		end
+
+		@box_assortment_array.each do |x|
+			puts x 
+			puts 
+		end
+
+		#Here for testing purposes
+		# @work_array.each do |x| 
+		# 	puts x
+		# 	puts
+		# end
 	end
 
 
