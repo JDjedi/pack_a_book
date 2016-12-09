@@ -1,5 +1,7 @@
 require 'rubygems'
 require 'nokogiri'
+require 'json'
+require 'neatjson'
 require 'pry'
 
 class Locator
@@ -13,8 +15,7 @@ class Locator
 			puts "***********************************************************************"
 			puts "Welcome to Pack-A-Book!"
 			puts "Please select an option: "
-			puts "Enter 1 to locate books relevant to your specifications."
-			puts "Enter 2 to sort the books into [X] amount of boxes for shipping."
+			puts "Enter 1 to locate books relevant to your specifications, and pack them for export."
 			puts "Enter 9 to exit"
 			puts "***********************************************************************"
 
@@ -22,10 +23,6 @@ class Locator
 				when '1'
 					puts "***********************************************************************"
 					page_loader
-				when '2'
-					puts "***********************************************************************"
-					sorter_exe = Sorter.new(@work_array)
-					sorter_exe.sort
 				when '9'
 					puts "***********************************************************************"
 					puts "Goodbye!"
@@ -44,12 +41,7 @@ class Locator
 			file = File.open(x)
 			page_parser(file)
 		end
-
-		@work_array.each do |x|
-			puts x
-			puts 
-		end
-		puts "Array of books compiled!"
+		send_to_sort
 	end
 
 	def page_parser(file)											#Parse through each page send from page_loader()
@@ -82,8 +74,14 @@ class Locator
 				book_info_hash[:isbn] = isbn_query
 			end
 		end
-
 		@work_array << book_info_hash
+	end
+
+	def send_to_sort
+		puts "Array of books compiled!"
+		puts
+		sorter_exe = Sorter.new(@work_array)
+		sorter_exe.sort
 	end
 end
 
@@ -93,41 +91,93 @@ class Sorter
 	def initialize(work_array)
 		@work_array = work_array
 		@packing_array = []
-		@box_assortment_array = []
+		@box_array = []
 	end
 
 	def sort
 		box = 0.0
-		@work_array = @work_array.sort! { |x, y| y[:weight] <=> x[:weight] }
+		@work_array = @work_array.sort! { |x, y| x[:weight] <=> y[:weight] }
 
-		while @work_array.length > 0 do 
-			while box <= 10.0 do 
-				binding.pry
-				box = box + @work_array[0][:weight].to_f
-				binding.pry
-				@packing_array << @work_array[0].shift
-				binding.pry
+		while @work_array.length > 0 do
+			if (@work_array[0][:weight].to_f + box) < 10.0
+				box += @work_array[0][:weight].to_f
+				@packing_array << @work_array.shift
+			else
+				box = 0.0
+				@box_array << @packing_array
+				@packing_array = []
 			end
-			binding.pry
-			box = 0.0
-			@box_assortment_array << @packing_array
-			@packing_array = []
 		end
-
-		@box_assortment_array.each do |x|
-			puts x 
-			puts 
-		end
-
-		#Here for testing purposes
-		# @work_array.each do |x| 
-		# 	puts x
-		# 	puts
-		# end
+		send_to_final
 	end
 
+	def send_to_final
+		puts "Books sorted and packed!"
+		puts
+		final_product = FinalProduct.new(@box_array)
+		final_product.output
+	end
+end
+
+class FinalProduct
+	attr_accessor :box_array
+
+	def initialize(box_array)
+		@final_order = []
+		@box_array = box_array
+		@time = Time.now.strftime('%e %b %Y - %H:%M:%S')
+	end
+
+	def output
+		puts "Final Output:"
+		puts
+		box = Hash.new
+		count = 0
+		weight = 0
+
+		@box_array.each do |box_content|
+			count += 1
+			box[:id] = count
+			box_content.each do |x|
+				weight = weight + x[:weight] 
+			end
+			box[:weight] = weight
+			box[:contents] = box_content
+
+			weight = 0
+			@final_order << box 
+			box = Hash.new
+		end
+
+		File.open('output/completed_order(' + @time.to_s + ').json.', 'w') do |f|
+			@final_order.each do |x|
+				f.puts JSON.neat_generate(x,wrap:50)
+			end
+		end
+		puts "Processing complete!"
+	end
 
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 run_program = Locator.new
 run_program.main_menu
