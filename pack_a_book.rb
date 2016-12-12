@@ -15,22 +15,21 @@ class Locator
 
 	def main_menu
 		loop do
-			puts ""
+			puts 
 			puts "***********************************************************************"
 			puts "Welcome to Pack-A-Book!"
 			puts "Please select an option: "
-			puts "Enter the word 'lookup' to locate books relevant to your specifications, and pack them for export."
+			puts "Enter the word 'execute' to locate books relevant to your specifications, and pack them for export."
 			puts "Enter the word 'exit' to exit"
 			puts "***********************************************************************"
+			puts
 
 			answer = gets.chomp
 			answer.downcase!
 
-			if answer == 'lookup'
-				puts
+			if answer == 'execute'
 				page_loader
 			elsif answer == 'exit'
-				puts
 				puts "Goodbye!"
 				puts "***********************************************************************"
 				puts
@@ -93,6 +92,38 @@ class Locator
 	end
 end
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #Sort books class
 class Sort
 	attr_accessor :parsed_content_array
@@ -105,20 +136,25 @@ class Sort
 	end
 
 	def sorter
-		weight_limit = 0.0
-		@parsed_content_array = @parsed_content_array.sort! { |x, y| x[:weight] <=> y[:weight] }
 
-		while @parsed_content_array.length > 0 do
-			if (@parsed_content_array[0][:weight].to_f + weight_limit) < 10.0
-				weight_limit += @parsed_content_array[0][:weight].to_f
-				@packing_array << @parsed_content_array.shift
-			else
-				weight_limit = 0.0
-				@package_array << @packing_array
-				@packing_array = []
+		weight_target = 10.0
+		array = [1.2, 4.1, 7.8, 2.6, 2.8, 7.6, 2.2, 9.4, 8.8, 1.4, 3.6, 3.2, 4.9, 6.4, 2.2, 3.6, 4.4, 1.4, 1.4, 5.6]
+		trial_array = []
+		foo = []
+
+		while array.length > 0 do
+			for i in 1..array.length do
+					trial_array << array.combination(i).find {|a| a.inject(:+) == weight_target }
+					array = array - trial_array.flatten.compact
 			end
+			weight_target = weight_target - 0.1
+			binding.pry
 		end
-		send_to_final
+
+		p array
+		exit
+
+#		send_to_final
 	end
 
 	def send_to_final
@@ -128,6 +164,44 @@ class Sort
 		final_product.final_output_generator
 	end
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #arrange, package, and save data to file in JSON format
 class FinalProduct
@@ -167,8 +241,8 @@ class FinalProduct
 		end
 
 		puts "Processing complete!"
-		puts
 		puts "Output JSON file placed in folder output/..."
+		puts
 		puts "Goodbye!"
 		puts "***********************************************************************"
 		puts
