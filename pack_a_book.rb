@@ -22,7 +22,6 @@ class Locator
 			puts "Enter the word 'execute' to locate books relevant to your specifications, and pack them for export."
 			puts "Enter the word 'exit' to exit"
 			puts "***********************************************************************"
-			puts
 
 			answer = gets.chomp
 			answer.downcase!
@@ -136,23 +135,30 @@ class Sort
 	end
 
 	def sorter
-
-		weight_target = 10.0
+		answer = []
 		array = [1.2, 4.1, 7.8, 2.6, 2.8, 7.6, 2.2, 9.4, 8.8, 1.4, 3.6, 3.2, 4.9, 6.4, 2.2, 3.6, 4.4, 1.4, 1.4, 5.6]
-		trial_array = []
-		foo = []
+		weight_target = 10.0
 
-		while array.length > 0 do
-			for i in 1..array.length do
-					trial_array << array.combination(i).find {|a| a.inject(:+) == weight_target }
-					array = array - trial_array.flatten.compact
-			end
-			weight_target = weight_target - 0.1
-			binding.pry
+		while weight_target > 0 do
+
+			example = (1..array.size).each_with_object([]) { |n,arr|
+				array.combination(n).each { |a|
+					 arr << a if a.reduce(:+) == weight_target } }
+
+			weight_target = (weight_target - 0.1).round(1)
+			answer << example.reverse
 		end
+		p answer
 
-		p array
+
+
 		exit
+
+
+
+
+
+
 
 #		send_to_final
 	end
