@@ -93,36 +93,6 @@ end
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #Sort books class
 class Sort
 	attr_accessor :parsed_content_array
@@ -158,42 +128,6 @@ class Sort
 		final_product.final_output_generator
 	end
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -235,7 +169,7 @@ class FinalProduct
 		end
 
 		puts "Processing complete!"
-		puts "Output JSON file placed in folder output/..."
+		puts "Completed JSON file placed in folder output/..."
 		puts
 		puts "Goodbye!"
 		puts "***********************************************************************"
@@ -247,7 +181,6 @@ end
 
 run_program = Locator.new
 run_program.main_menu
-
 
 
 
