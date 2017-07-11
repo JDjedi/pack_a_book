@@ -1,7 +1,22 @@
 README
 
-This program uses Ruby version 2.3 as well as several gems. Also, the program is
-	run entirely within the command prompt.
+Goals
+-----
+Coding challenge involving parsing amazon webpages(within a file in the repo) for book information and extracts it.
+
+The program then sorts the books into boxes by weight specification; total weight cannot exceed 10lbs.
+
+The box contents and information is then outputted in a JSON format.
+
+What I learned
+--------------
+This is the direction I want to take my progamming career in, full fledged software development
+
+Taking the vast amounts of information and data and using programming to turn that into something meaningful is both challenging and fun
+
+How to make classes and objects interact seamlessly
+
+Development process and planning coupled with execcution
 
 Ruby install guide:
 
