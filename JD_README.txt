@@ -8,10 +8,6 @@ Ruby install guide:
 	+ If using OSX or linux: 
 		While in the command prompt type "ruby-install" and let it work its magic
 
-	+ If using Windows within the folder titled "build" well be a package calles
-		"rubyinstaller-2.3.3.exe". Simply extract the package and follow the
-		installation guide.
-
 Ruby gems install guide:
 	
 	+ Since we will be using ruby 2.3 we do not need to install ruby gems in a specific manner,
